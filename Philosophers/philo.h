@@ -7,6 +7,7 @@
 # include <stdlib.h>
 # include <unistd.h>
 # include <sys/time.h>
+# include <limits.h>
 
 typedef struct s_all
 {
@@ -31,13 +32,13 @@ typedef struct s_philo
 
 int				ft_atoi(char *str);
 int				exit_error(void);
-int				check_arg(char **v);
-int				arg_to_param(t_const_philo *var, char **v);
-void			assign_param(t_philo *philo, t_const_philo *var,
-					pthread_mutex_t *m, pthread_mutex_t *pr);
-int				free_param(t_philo *philo, pthread_mutex_t *m,
-					t_const_philo *var);
-int				init_param(t_philo *philo, t_const_philo *var);
+int				is_valid_numeric_args(char **argv);
+int				parse_arg_to_config(t_const_philo *config, char **argv);
+void			initialize_philos(t_philo *philos, t_const_philo *config,
+					pthread_mutex_t *forks, pthread_mutex_t *print_lock);
+int				clean_up_resources(t_philo *philos, pthread_mutex_t *forks,
+					t_const_philo *config);
+int				set_simul_params(t_philo *philos, t_const_philo *config);
 void			dest_mutex(t_philo *philo);
 unsigned long	in_time(void);
 unsigned long	real_time(t_philo *philo);

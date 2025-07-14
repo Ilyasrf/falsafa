@@ -1,18 +1,29 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   arg.c                                              :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: irfei <irfei@student.42.fr>                +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/06/09 16:11:39 by irfei             #+#    #+#             */
+/*   Updated: 2025/07/14 18:03:57 by irfei            ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "philo.h"
 
-int	check_arg(char **v)
+int	is_valid_numeric_args(char **argv)
 {
 	int	i;
-	int	j;
 
 	i = 1;
-	j = 0;
-	while (v[i])
+	while (argv[i])
 	{
+		int	j;
 		j = 0;
-		while (v[i][j])
+		while (argv[i][j])
 		{
-			if ((v[i][j] < '0' || v[i][j] > '9') && j != 0)
+			if ((argv[i][j] < '0' || argv[i][j] > '9') && j != 0)
 				return (1);
 			j++;
 		}
@@ -21,73 +32,73 @@ int	check_arg(char **v)
 	return (0);
 }
 
-int	arg_to_param(t_const_philo *var, char **v)
+int	parse_arg_to_config(t_const_philo *config, char **argv)
 {
-	if (check_arg(v))
+	if (is_valid_numeric_args(argv))
 		return (exit_error());
-	var->total_ate = 0;
-	var->time = in_time();
-	var->num_philo = ft_atoi(v[1]);
-	var->time_die = ft_atoi(v[2]);
-	var->time_eat = ft_atoi(v[3]);
-	var->time_sleep = ft_atoi(v[4]);
-	if (var->num_philo <= 0 || var->time_die <= 0
-		|| var->time_eat <= 0 || var->time_sleep <= 0)
+	config->total_ate = 0;
+	config->time = in_time();
+	config->num_philo = ft_atoi(argv[1]);
+	config->time_die = ft_atoi(argv[2]);
+	config->time_eat = ft_atoi(argv[3]);
+	config->time_sleep = ft_atoi(argv[4]);
+	if (config->num_philo <= 0 || config->time_die <= 0
+		|| config->time_eat <= 0 || config->time_sleep <= 0)
 		return (1);
-	if (v[5])
+	if (argv[5])
 	{
-		var->must_eat = ft_atoi(v[5]);
-		if (var->must_eat <= 0)
+		config->must_eat = ft_atoi(argv[5]);
+		if (config->must_eat <= 0)
 			return (1);
 	}
 	else
-		var->must_eat = -1;
+		config->must_eat = -1;
 	return (0);
 }
 
-void	assign_param(t_philo *philo, t_const_philo *var,
-	pthread_mutex_t *m, pthread_mutex_t *pr)
+void	initialize_philos(t_philo *philos, t_const_philo *config,
+	pthread_mutex_t *forks, pthread_mutex_t *print_lock)
 {
 	int	i;
 
 	i = 0;
-	while (i < var->num_philo)
+	while (i < config->num_philo)
 	{
-		philo[i].ate = 0;
-		philo[i].id = i + 1;
-		philo[i].mutex = m;
-		philo[i].print = pr;
-		philo[i].var = var;
+		philos[i].ate = 0;
+		philos[i].id = i + 1;
+		philos[i].mutex = forks;
+		philos[i].print = print_lock;
+		philos[i].var = config;
 		i++;
 	}
 }
 
-int	free_param(t_philo *philo, pthread_mutex_t *m, t_const_philo *var)
+int	clean_up_resources(t_philo *philos, pthread_mutex_t *forks, t_const_philo *config)
 {
-	if (philo)
-		free(philo);
-	if (m)
-		free(m);
-	if (var)
-		free(var);
+	if (philos)
+		free(philos);
+	if (forks)
+		free(forks);
+	if (config)
+		free(config);
 	return (1);
 }
 
-int	init_param(t_philo *philo, t_const_philo *var)
+int	set_simul_params(t_philo *philos, t_const_philo *config)
 {
-	pthread_mutex_t	*m;
-	pthread_mutex_t	pr;
+	pthread_mutex_t	*forks;
+	pthread_mutex_t	print_lock;
 	int				i;
 
 	i = 0;
-	m = (pthread_mutex_t *)malloc(sizeof(pthread_mutex_t) * var->num_philo);
-	if (!m || !philo)
-		return (free_param(philo, m, var));
-	while (i < var->num_philo)
-		if (pthread_mutex_init(&m[i++], 0))
-			return (free_param(philo, m, var));
-	if (pthread_mutex_init(&pr, 0))
-		return (free_param(philo, m, var));
-	assign_param(philo, var, m, &pr);
+	forks = (pthread_mutex_t *)malloc(sizeof(pthread_mutex_t) * config->num_philo);
+	if (!forks || !philos)
+		return (clean_up_resources(philos, forks, config));
+	while (i < config->num_philo)
+		if (pthread_mutex_init(&forks[i++], 0))
+			return (clean_up_resources(philos, forks, config));
+	if (pthread_mutex_init(&print_lock, 0))
+		return (clean_up_resources(philos, forks, config));
+	initialize_philos(philos, config, forks, &print_lock);
 	return (0);
 }

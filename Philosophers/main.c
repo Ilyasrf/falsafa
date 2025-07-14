@@ -1,20 +1,22 @@
 
 #include "philo.h"
 
-void	print(t_philo *philo, unsigned long time, char *is_doing)
+int	exit_error(void)
 {
-	pthread_mutex_lock(philo->print);
-	printf("%lums	%d %s\n", time, philo->id, is_doing);
-	pthread_mutex_unlock(philo->print);
+	printf("Error in Params please enter: num_philo\
+	time_die time_eat time_sleep (num_eat)\n");
+	return (1);
 }
-
 void	*doo(void *p)
 {
 	t_philo	*philo;
 
 	philo = (t_philo *)p;
 	if (philo->id % 2 == 0)
+	{
 		usleep(10);
+		print(philo, real_time(philo), "is thinking");
+	}
 	philo->last_meal = in_time();
 	while (1)
 	{
@@ -47,7 +49,7 @@ void	func(t_philo *philo, t_const_philo *var)
 		if (philo[i].var->total_ate == philo[i].var->num_philo)
 		{
 			dest_mutex(philo);
-			free_param(philo, philo->mutex, var);
+			clean_up_resources(philo, philo->mutex, var);
 			return ;
 		}
 		if (in_time() - philo[i].last_meal
@@ -55,21 +57,14 @@ void	func(t_philo *philo, t_const_philo *var)
 		{
 			usleep(100);
 			pthread_mutex_lock(philo->print);
-			printf("%lums	%d died", real_time(philo), philo->id);
+			printf("%lu	%d died", real_time(philo), philo->id);
 			dest_mutex(philo);
-			free_param(philo, philo->mutex, var);
+			clean_up_resources(philo, philo->mutex, var);
 			return ;
 		}
 		i = (i + 1) % var->num_philo;
 		usleep(500);
 	}
-}
-
-int	exit_error(void)
-{
-	printf("Error in Params please enter: num_philo\
-	time_die time_eat time_sleep (num_eat)\n");
-	return (1);
 }
 
 int	main(int c, char **v)
@@ -82,8 +77,8 @@ int	main(int c, char **v)
 	if (c < 5 || c > 6)
 		return (exit_error());
 	var = (t_const_philo *)malloc(sizeof(t_const_philo));
-	if (arg_to_param(var, v))
-		return (free_param(0, 0, var));
+	if (parse_arg_to_config(var, v))
+		return (clean_up_resources(0, 0, var));
 	philo = (t_philo *)malloc(sizeof(t_philo) * var->num_philo);
 	if (init_param(philo, var))
 		return (1);

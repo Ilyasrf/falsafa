@@ -2,28 +2,31 @@
 
 int	ft_atoi(char *str)
 {
-	int		i;
-	long	r;
-	int		k;
+	int				i;
+	unsigned long	result;
+	int				sign;
 
 	i = 0;
-	r = 0;
-	k = 1;
-	while (str[i] == ' ' || str[i] == '\t' || str[i] == '\n'
-		|| str[i] == '\v' || str[i] == '\f' || str[i] == '\r')
+	result = 0;
+	sign = 1;
+	while ((str[i] >= 9 && str[i] <= 13) || str[i] == 32)
 		i++;
 	if (str[i] == '-' || str[i] == '+')
 	{
 		if (str[i] == '-')
-			k *= -1;
+			sign = -1;
 		i++;
 	}
 	while (str[i] >= '0' && str[i] <= '9')
 	{
-		r = (r * 10) + (str[i] - 48);
+		result = result * 10 + (str[i] - '0');
+		if (result > LONG_MAX && sign == 1)
+			return (-1);
+		if (result > (unsigned long)LONG_MAX + 1 && sign == -1)
+			return (0);
 		i++;
 	}
-	return (r * k);
+	return ((int)(result * sign));
 }
 
 void	dest_mutex(t_philo *philo)
@@ -53,3 +56,11 @@ unsigned long	real_time(t_philo *philo)
 {
 	return (in_time() - philo->var->time);
 }
+
+void	print(t_philo *philo, unsigned long time, char *is_doing)
+{
+	pthread_mutex_lock(philo->print);
+	printf("%lu	%d %s\n", time, philo->id, is_doing);
+	pthread_mutex_unlock(philo->print);
+}
+
