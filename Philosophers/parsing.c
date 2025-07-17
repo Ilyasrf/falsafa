@@ -37,7 +37,7 @@ int	parse_arg_to_config(t_const_philo *config, char **argv)
 	if (is_valid_numeric_args(argv))
 		return (exit_error());
 	config->total_ate = 0;
-	config->time = in_time();
+	config->time = get_current_time();
 	config->num_philo = ft_atoi(argv[1]);
 	config->time_die = ft_atoi(argv[2]);
 	config->time_eat = ft_atoi(argv[3]);

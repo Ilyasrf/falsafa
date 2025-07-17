@@ -1,14 +1,10 @@
 NAME = philosopher
 
-
-src = main.c arg.c utils.c
-
+src = main.c parsing.c utils.c
 
 obj = $(src:.c=.o)
 
-
 hd = philo.h
-
 
 flags = -Wall -Wextra -Werror
 

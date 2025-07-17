@@ -15,26 +15,26 @@ void	*doo(void *p)
 	if (philo->id % 2 == 0)
 	{
 		usleep(10);
-		print(philo, real_time(philo), "is thinking");
+		print_action(philo, real_time(philo), "is thinking");
 	}
-	philo->last_meal = in_time();
+	philo->last_meal = get_current_time();
 	while (1)
 	{
 		pthread_mutex_lock(&philo->mutex[philo->id - 1]);
-		print(philo, real_time(philo), "has taken a fork");
+		print_action(philo, real_time(philo), "has taken a fork");
 		pthread_mutex_lock(&philo->mutex[philo->id % philo->var->num_philo]);
-		print(philo, real_time(philo), "has taken a fork");
-		print(philo, real_time(philo), "is eating");
+		print_action(philo, real_time(philo), "has taken a fork");
+		print_action(philo, real_time(philo), "is eating");
 		philo->ate++;
 		if (philo->ate == philo->var->must_eat)
 			philo->var->total_ate++;
 		usleep(philo->var->time_eat * 1000);
-		philo->last_meal = in_time();
+		philo->last_meal = get_current_time();
 		pthread_mutex_unlock(&philo->mutex[philo->id - 1]);
 		pthread_mutex_unlock(&philo->mutex[philo->id % philo->var->num_philo]);
-		print(philo, real_time(philo), "is sleeping");
+		print_action(philo, real_time(philo), "is sleeping");
 		usleep(philo->var->time_sleep * 1000);
-		print(philo, real_time(philo), "is thinking");
+		print_action(philo, real_time(philo), "is thinking");
 	}
 	return (0);
 }
@@ -48,17 +48,17 @@ void	func(t_philo *philo, t_const_philo *var)
 	{
 		if (philo[i].var->total_ate == philo[i].var->num_philo)
 		{
-			dest_mutex(philo);
+			destroy_fork_mutexes(philo);
 			clean_up_resources(philo, philo->mutex, var);
 			return ;
 		}
-		if (in_time() - philo[i].last_meal
+		if (get_current_time() - philo[i].last_meal
 			> (unsigned long)var->time_die)
 		{
 			usleep(100);
 			pthread_mutex_lock(philo->print);
-			printf("%lu	%d died", real_time(philo), philo->id);
-			dest_mutex(philo);
+			printf("%lu	%d died", get_current_time() - philo->var->time, philo->id);
+			destroy_fork_mutexes(philo);
 			clean_up_resources(philo, philo->mutex, var);
 			return ;
 		}
@@ -80,7 +80,7 @@ int	main(int c, char **v)
 	if (parse_arg_to_config(var, v))
 		return (clean_up_resources(0, 0, var));
 	philo = (t_philo *)malloc(sizeof(t_philo) * var->num_philo);
-	if (init_param(philo, var))
+	if (set_simul_params(philo, var))
 		return (1);
 	th = (pthread_t *)malloc(sizeof(pthread_t) * var->num_philo);
 	i = -1;

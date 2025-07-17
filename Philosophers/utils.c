@@ -29,38 +29,32 @@ int	ft_atoi(char *str)
 	return ((int)(result * sign));
 }
 
-void	dest_mutex(t_philo *philo)
+void	destroy_fork_mutexes(t_philo *philos)
 {
 	int	i;
 
 	i = 0;
-	while (i < philo->var->num_philo)
-		pthread_mutex_destroy(&philo->mutex[i++]);
+	while (i < philos->var->num_philo)
+		pthread_mutex_destroy(&philos->mutex[i++]);
 }
 
-unsigned long	in_time(void)
+unsigned long	get_current_time(void)
 {
-	struct timeval	time;
-	unsigned long	l;
-	unsigned long	s;
-	unsigned long	u;
+	struct timeval	now;
 
-	gettimeofday(&time, NULL);
-	s = (time.tv_sec * 1000);
-	u = (time.tv_usec / 1000);
-	l = s + u;
-	return (l);
+	gettimeofday(&now, NULL);
+	return ((now.tv_sec * 1000UL) + (now.tv_usec / 1000));
 }
 
 unsigned long	real_time(t_philo *philo)
 {
-	return (in_time() - philo->var->time);
+	return (get_current_time() - philo->var->time);
 }
 
-void	print(t_philo *philo, unsigned long time, char *is_doing)
+void	print_action(t_philo *philo, unsigned long time, char *action)
 {
 	pthread_mutex_lock(philo->print);
-	printf("%lu	%d %s\n", time, philo->id, is_doing);
+	printf("%lu	%d %s\n", time, philo->id, action);
 	pthread_mutex_unlock(philo->print);
 }
 

@@ -39,10 +39,10 @@ void			initialize_philos(t_philo *philos, t_const_philo *config,
 int				clean_up_resources(t_philo *philos, pthread_mutex_t *forks,
 					t_const_philo *config);
 int				set_simul_params(t_philo *philos, t_const_philo *config);
-void			dest_mutex(t_philo *philo);
-unsigned long	in_time(void);
+void			destroy_fork_mutexes(t_philo *philos);
+unsigned long	get_current_time(void);
 unsigned long	real_time(t_philo *philo);
-void			print(t_philo *philo, unsigned long time, char *is_doing);
+void			print_action(t_philo *philo, unsigned long time, char *action);
 void			*doo(void *p);
 void			func(t_philo *philo, t_const_philo *var);
 
